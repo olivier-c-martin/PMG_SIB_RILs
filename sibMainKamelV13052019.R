@@ -28,11 +28,11 @@
     recRates = c(0.4, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1)
     ## If you want to read the variables contributing to the system from the file
     # setwd("~/Documents/SVmapNew/MarianyelaProject/R")
-    # allvar = list.load("allVarTillL=10.rds")
-    # SCHPE = list.load("allContrVarTillL=10.rds")
-    # varNom = allvar[[L]]$symQs
-    # nonSymQs = allvar[[L]]$nonsymQs
-    # scEq = SCHPE[[L]]
+    allvar = list.load("allVarTillL=10.rds")
+    SCHPE = list.load("allContrVarTillL=10.rds")
+    varNom = allvar[[L]]$symQs
+    nonSymQs = allvar[[L]]$nonsymQs
+    scEq = SCHPE[[L]]
     ## =================================================
     ## =================== End Inpute ==================
     ## =================================================
@@ -40,10 +40,10 @@
     cat("\n")
     ## The main Functions
     ## compute all the possible haplotype in the sytem 
-    allVar = systemVar(L)
-    varNom = allVar$symQs
-    nonSymQs = allVar$nonsymQs
-    scEq = allCrossOver(varNom = varNom)
+    # allVar = systemVar(L)
+    # varNom = allVar$symQs
+    # nonSymQs = allVar$nonsymQs
+    # scEq = allCrossOver(varNom = varNom)
   
     res = twoWayRILsib(L, varNom, nonSymQs, scEq)
     
