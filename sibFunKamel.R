@@ -1,5 +1,5 @@
     # ==============================================
-    ###                    s2c
+    ##                   s2c
     # ==============================================
     s2c = function (string) {
       ## Function to transforms a vector into a string.
