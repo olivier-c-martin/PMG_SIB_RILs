@@ -11,7 +11,7 @@
     }# EndFun s2c
     
     # ===============================================
-    ####                  c2s
+    ###                  c2s
     # ===============================================
     ## Function to transforms a vector into a string.
     ## arguments : vect = Vector of characters of numbers or both.
@@ -571,8 +571,7 @@
       #}#EndFor
       return(allContrVar)
     }#EndFun
-   
-    
+
     # ==============================
     ## 
     # ==============================
