@@ -1,5 +1,5 @@
     # ==============================================
-    ###                    s2c
+    ##                   s2c
     # ==============================================
     s2c = function (string) {
       ## Function to transforms a vector into a string.
@@ -571,46 +571,7 @@
       #}#EndFor
       return(allContrVar)
     }#EndFun
-    
-    # ====================================
-    ##    Compute all marginal equations
-    # ====================================
-    ## function to compute all the marginal equation at any given loci l.
-    ##                L =  integr, the loci index.
-    ##                varNom = vector of all the unique variables name in the l loci system.
-    
-    ## Return: a matrix of all marginal equations.
-    
-    marginEquations = function(l, varNom) {
-      A = NULL
-      uniqueQsPrev = varNom[[l-1]]
-      ln_uniqueQsPrev = length(uniqueQsPrev)
-      uniqueQs = varNom[[l]]
-      ln_uniqueQs = length(uniqueQs)
-      cat("\n")
-      cat("Marginal Equation:")
-      for (i in 1:1) {
-        q = length(s2c(uniqueQs[1]))
-        while (q >= 1) {
-          AA = matrix(0, ncol = ln_uniqueQs, nrow = 1)
-          colnames(AA) = uniqueQs
-          rownames(AA) = inserteChar(uniqueQsPrev[i], "x", q)
-          marg = matrix(rep(s2c(uniqueQsPrev[i]), 4), ncol = length(s2c(uniqueQsPrev[i])) , byrow = 1)
-          marg = insertVector(q = q,
-                              mat = marg,
-                              v = as.character(c(0, 1, 2, 3)))
-          cat(" ", rownames(AA), ">>")
-          eq = apply(marg, 1, c2s)
-          eq = unlist(lapply(eq, standerIndex))
-          w = table(eq)
-          AA[, names(w)] = as.vector(w)
-          A = rbind(A, AA)
-          q = q - 1
-        }#EndWhile
-      }#EndFor
-      cat("\n")
-      return(A = A)
-    }#EndFun
+   
     
     # ==============================
     ## 
