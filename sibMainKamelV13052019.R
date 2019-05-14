@@ -1,19 +1,8 @@
-# For 8 loci Time difference of 5.290853 mins
-# For 7 loci Time difference of 32.37045 secs
-# For 6 loci Time difference of 4.602918
-# For 5 loci Time difference of 0.5602674 secs
-# For 4 loci Time difference of 0.1071317 secs
-# For 3 loci Time difference of 0.05963397 secs
-# For 2 loci Time difference of 0.04218674 secs
-# locus one
 
     rm(list=objects())
-    # source("http://bioconductor.org/biocLite.R")
-    # biocLite("gpuR")
     library(eply)
     library(Matrix)
     library(rlist)
-
     source('~/Documents/SVmapNew/MarianyelaProject/R/sibFunKamel.R')
     ## =================================================
     ## =================== Start Inpute ================
@@ -22,7 +11,6 @@
     L = 7
     nQs = 2^(L-2) * (2^(L-1) + 1)
     ## Input the successive recombination rates
-    recRates = c(0.5, 0.3, 0.4)
     recRates = c(0.4, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1)
     ## If you want to read the variables contributing to the system from the file
     # setwd("~/Documents/SVmapNew/MarianyelaProject/R")
@@ -58,7 +46,6 @@
     ## print the time taken
     time.taken
     ## close the clusters 
-    setwd("~/Documents")
     ## save the matrix A
     #write.table(A, paste("resforL=",L,".txt",sep = ""), quote=FALSE, eol="\\\\\n", sep=" & ")
     ## verify that the sum over the Qs equal to one
