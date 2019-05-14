@@ -10,8 +10,6 @@
     rm(list=objects())
     # source("http://bioconductor.org/biocLite.R")
     # biocLite("gpuR")
-    library(parallel)
-    library(doParallel)
     library(eply)
     library(Matrix)
     library(rlist)
@@ -39,7 +37,7 @@
     start.time = Sys.time()
     cat("\n")
     ## The main Functions
-    ## compute all the possible haplotype in the sytem 
+    ## If you want to compute all the possible haplotype in the sytem 
     # allVar = systemVar(L)
     # varNom = allVar$symQs
     # nonSymQs = allVar$nonsymQs
