@@ -65,4 +65,5 @@
     QsProbs = rbind(sol, table(nonSymQs))
     sum(QsProbs[1,] * QsProbs[2,])
     
+    
    
