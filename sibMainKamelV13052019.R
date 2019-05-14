@@ -5,6 +5,7 @@
 # For 4 loci Time difference of 0.1071317 secs
 # For 3 loci Time difference of 0.05963397 secs
 # For 2 loci Time difference of 0.04218674 secs
+# locus one
 
     rm(list=objects())
     # source("http://bioconductor.org/biocLite.R")
