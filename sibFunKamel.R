@@ -550,6 +550,7 @@
         nonsymQs = unlist(lapply(Qs, standerIndex))
         symQs = unique(nonsymQs)
       #}#EndFor
+        cat("done. \n")
       return(list(symQs = symQs, nonsymQs = nonsymQs))
     }#EndFun
     
@@ -563,12 +564,15 @@
     
     allCrossOver = function(varNom){
       allContrVar = vector("list", length(varNom))
+      cat("\n Find the possible crossover for these variable, please wait ... \n")
+      
       #for (l in 2:L) {
         noVarPerlocus = length(varNom)
         for (vr in 1:noVarPerlocus){
           allContrVar[[vr]] = contributedQs(varNom[vr])
         }#EndFor
       #}#EndFor
+        cat("done. \n")
       return(allContrVar)
     }#EndFun
 
@@ -597,12 +601,14 @@
         cat("\n # ======", L," - Loci ====== #", "\n")
         ln_varNom = length(varNom)
         ## Sum (Q)= 1 
+        cat("\n Computing the inhomogeneous equation: ")
         A = matrix(0, ncol = length(varNom), nrow = ln_varNom)
         colnames(A) = varNom
         rownames(A) = c("SQ",varNom[-ln_varNom])
         A[1,] = table(nonSymQs)
+        cat("done. \n")
         ## start computing the self consistance equation (SCHP) for each varNom 
-        cat("\n SCHP: ")
+        cat("\n Computing the SCHP: ")
         for (sc in 1:(ln_varNom-1) ){
           ## find all the possible meiotic product (the set V) for each haplotypes (u) denoted by varNom 
           eq = scEq[[sc]]
@@ -618,13 +624,13 @@
           ## rearrange the SCHP equation to be equal to zero
           if(!(varNom[sc] %in% eq)) A[sc+1, varNom[sc]] = -1
         }#EndFor
-        cat("\n done \n")
         # if you wan to write A matrix
         # write.table(A, paste("QmatL=",L,".txt",sep = ""))
         ## The vector B in system AQ = B 
         B = rep(0, ln_varNom)
         ## sum(Q_i) = 1
         B[1] = 1
+        cat("\n done. \n")
         ## Evaluate the matrix A for patriculare values of r's
         return(list(A = A, B = B))
       }#EndIFelseA
