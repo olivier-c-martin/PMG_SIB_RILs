@@ -1,5 +1,5 @@
     # ==============================================
-    ##                   s2c
+    ####                    s2c
     # ==============================================
     s2c = function (string) {
       ## Function to transforms a vector into a string.
@@ -11,7 +11,7 @@
     }# EndFun s2c
     
     # ===============================================
-    ###                  c2s
+    ####                  c2s
     # ===============================================
     ## Function to transforms a vector into a string.
     ## arguments : vect = Vector of characters of numbers or both.
@@ -316,11 +316,16 @@
     ## return a matrix of all the possible haplotypes.
     matrix4powL = function(L) {
       fourPowL = 4^L
-      completeMat = matrix(data = 0,
-                               nrow = fourPowL,
-                               ncol = L)
-      for (i in 0:(fourPowL - 1)) {
+      completeMat = matrix(data = 0, nrow = fourPowL, ncol = L)
+      cpt = 10
+      I = (fourPowL - 1)
+      for (i in 0:I) {
         completeMat[1 + i, ] = quatNumber(i, L)
+        ## Print percentage of accomplished vertices
+        if ( ((i/I)*100)>=cpt ) {
+          cat(cpt, "% ",sep="")
+          cpt=cpt+10
+        }
       }
       return(completeMat)
     }#EndFun
@@ -550,7 +555,7 @@
         nonsymQs = unlist(lapply(Qs, standerIndex))
         symQs = unique(nonsymQs)
       #}#EndFor
-        cat("done. \n")
+        cat("\n")
       return(list(symQs = symQs, nonsymQs = nonsymQs))
     }#EndFun
     
@@ -564,18 +569,61 @@
     
     allCrossOver = function(varNom){
       allContrVar = vector("list", length(varNom))
-      cat("\n Find the possible crossover for these variable, please wait ... \n")
-      
       #for (l in 2:L) {
         noVarPerlocus = length(varNom)
+        cpt = 10
         for (vr in 1:noVarPerlocus){
           allContrVar[[vr]] = contributedQs(varNom[vr])
+          ## Print percentage of accomplished vertices
+          if ( ((vr/noVarPerlocus)*100)>=cpt ) {
+            cat(cpt, "% ",sep="")
+            cpt=cpt+10
+          }
         }#EndFor
       #}#EndFor
-        cat("done. \n")
       return(allContrVar)
     }#EndFun
-
+    
+    # ====================================
+    ##    Compute all marginal equations
+    # ====================================
+    ## function to compute all the marginal equation at any given loci l.
+    ##                L =  integr, the loci index.
+    ##                varNom = vector of all the unique variables name in the l loci system.
+    
+    ## Return: a matrix of all marginal equations.
+    
+    marginEquations = function(l, varNom) {
+      A = NULL
+      uniqueQsPrev = varNom[[l-1]]
+      ln_uniqueQsPrev = length(uniqueQsPrev)
+      uniqueQs = varNom[[l]]
+      ln_uniqueQs = length(uniqueQs)
+      cat("\n")
+      cat("Marginal Equation:")
+      for (i in 1:1) {
+        q = length(s2c(uniqueQs[1]))
+        while (q >= 1) {
+          AA = matrix(0, ncol = ln_uniqueQs, nrow = 1)
+          colnames(AA) = uniqueQs
+          rownames(AA) = inserteChar(uniqueQsPrev[i], "x", q)
+          marg = matrix(rep(s2c(uniqueQsPrev[i]), 4), ncol = length(s2c(uniqueQsPrev[i])) , byrow = 1)
+          marg = insertVector(q = q,
+                              mat = marg,
+                              v = as.character(c(0, 1, 2, 3)))
+          cat(" ", rownames(AA), ">>")
+          eq = apply(marg, 1, c2s)
+          eq = unlist(lapply(eq, standerIndex))
+          w = table(eq)
+          AA[, names(w)] = as.vector(w)
+          A = rbind(A, AA)
+          q = q - 1
+        }#EndWhile
+      }#EndFor
+      cat("\n")
+      return(A = A)
+    }#EndFun
+    
     # ==============================
     ## 
     # ==============================
@@ -601,14 +649,12 @@
         cat("\n # ======", L," - Loci ====== #", "\n")
         ln_varNom = length(varNom)
         ## Sum (Q)= 1 
-        cat("\n Computing the inhomogeneous equation: ")
         A = matrix(0, ncol = length(varNom), nrow = ln_varNom)
         colnames(A) = varNom
         rownames(A) = c("SQ",varNom[-ln_varNom])
         A[1,] = table(nonSymQs)
-        cat("done. \n")
         ## start computing the self consistance equation (SCHP) for each varNom 
-        cat("\n Computing the SCHP: ")
+        cat("\n Computing the Self-consistent equations: ... \n")
         for (sc in 1:(ln_varNom-1) ){
           ## find all the possible meiotic product (the set V) for each haplotypes (u) denoted by varNom 
           eq = scEq[[sc]]
@@ -620,20 +666,171 @@
             if(varNom[sc] == eq[q]) we = paste(we,-1,sep = "");
             A[sc+1, eq[q]] = we
           }
-          cat(" ",sc,">> ")
+          #cat(" ",sc,">> ")
+          cat(sc, "of", (ln_varNom-1), "\r") 
+          
           ## rearrange the SCHP equation to be equal to zero
           if(!(varNom[sc] %in% eq)) A[sc+1, varNom[sc]] = -1
         }#EndFor
+        cat("\n done \n")
         # if you wan to write A matrix
         # write.table(A, paste("QmatL=",L,".txt",sep = ""))
         ## The vector B in system AQ = B 
         B = rep(0, ln_varNom)
         ## sum(Q_i) = 1
         B[1] = 1
-        cat("\n done. \n")
         ## Evaluate the matrix A for patriculare values of r's
         return(list(A = A, B = B))
       }#EndIFelseA
+    }#EndFun
+    
+    # ======================================
+    ## Function to convert decimal to binary 
+    # ======================================
+    intToBin <- function(x){
+      if (x == 1)
+        1
+      else if (x == 0)
+        0
+      else {
+        mod <- x %% 2
+        c(intToBin((x-mod) %/% 2), mod)
+      }
+    }
+    
+    # ====================================
+    ## convert Qs to Freq  
+    # ====================================
+    QsToFreq = function(L, sol){
+      cpt = 10
+      vecGenoProbs =rep(0, 2^L)
+      vecZeroes = rep(0, 2^L)
+      iRILgenome=0
+      for(iRILgenome in 0:(2^L-1)){ # loop over all possible RIL genotypes 
+        binaryGene  =  intToBin(iRILgenome)
+        if(length(binaryGene)< L){
+          binaryGene = c(vecZeroes[1:(L-length(binaryGene))], binaryGene) 
+        }
+        for (iVecjs in 0:(2^L-1) ){
+          vecjs = intToBin(iVecjs)
+          if(length(vecjs)< L){
+            vecjs = c(vecZeroes[1:(L-length(vecjs))], vecjs) 
+          }
+          vecis = binaryGene + 2*vecjs 
+          Qindex = c2s(vecis)
+          ind = standerIndex(Qindex)
+          vecGenoProbs[iRILgenome + 1] = vecGenoProbs[iRILgenome + 1] + sol[ind]
+          if ( ((iRILgenome/(2^L-1))*100)>=cpt ) {
+            cat(cpt, "% ",sep="")
+            cpt=cpt+10
+          }
+        }# EndForLoop1
+      }#EndForLoop2
+      cat("\n")
+      return(vecGenoProbs)
+    }#EndFun
+    
+    
+    # ======================
+    ## convert binary to decimal 
+    # ======================
+    
+    #Function from binary number to decimal number
+    binTodec = function(binVector){
+      num_bits = length(binVector)
+      number = 0
+      for (i in 1:num_bits){
+        number = number + binVector[i] * 2^(num_bits-i)
+      }
+      return(number)
+    }#EndFun
+    
+    # ======================
+    ## doing meiosis 
+    # ======================
+    Make_Gamete<- function(L, recRates, gamete0, gamete1){
+      gamete <-rep(0,L)
+      chrom <-rbind(gamete0,gamete1)
+      ifelse (runif(1) > 0.5, gamete[1] <- chrom[k<-1,1], gamete[1]<-chrom[k<-2,1])
+      for (iLoc in 2:L){
+        rand <- runif(1)
+        if (rand > recRates[iLoc-1]){
+          if (k == 1)    gamete[iLoc] <- chrom[j<-1, iLoc]
+          if (k == 2)    gamete[iLoc] <- chrom[j<-2, iLoc]
+        }
+        if (rand<=recRates[iLoc-1]){
+          if (k == 1)    gamete[iLoc] <- chrom[j<-2, iLoc]
+          if (k == 2)    gamete[iLoc] <- chrom[j<-1, iLoc]
+        }
+        k <- j
+      }	
+      return(gamete)
+    }#EndFun
+    
+    # ======================
+    ## make new generation 
+    # ======================
+    Make_Next_Generation = function(L, recRates, childGenotype, type = "sib"){
+      
+      if(type == "sib"){
+        gamete0 = childGenotype[1,]; gamete1 = childGenotype[2,]; 
+        gamete2 = childGenotype[3,]; gamete3 = childGenotype[4,];
+        
+        newGamete0 = Make_Gamete(L, recRates, gamete0, gamete1)
+        newGamete1 = Make_Gamete(L, recRates, gamete2, gamete3)
+        newGamete2 = Make_Gamete(L, recRates, gamete0, gamete1)
+        newGamete3 = Make_Gamete(L, recRates, gamete2, gamete3)
+        childGenotype = matrix(c(newGamete0, newGamete1, 
+                                 newGamete2, newGamete3), 
+                               ncol = L, byrow = TRUE)
+        
+      }else if(type == "self"){
+        gamete0 = childGenotype[1,]
+        gamete1 = childGenotype[2,]; 
+        
+        newGamete0 = Make_Gamete(L, recRates, gamete0, gamete1)
+        newGamete1 = Make_Gamete(L, recRates, gamete0, gamete1)
+        childGenotype = matrix(c(newGamete0, newGamete1), 
+                               ncol = L, byrow = TRUE)
+      }else{
+        stop("Please specify the type of fertilization ... ")
+      }
+      
+      
+      return(childGenotype)
+    }#EndFun
+    
+    # ======================
+    ## cheack the fixation 
+    # ======================
+    Is_childGenotype_Fixed = function(childGenotype){
+      L = dim(childGenotype)[2]
+      n = dim(childGenotype)[1]
+      
+      for (i in 2:n){
+        if (sum(childGenotype[i,] == childGenotype[1,]) != L){
+          return(FALSE)
+        }
+      }#EndFor
+      return(TRUE)
+    }#EndFun
+    
+    # ======================
+    ## new RIL generation 
+    # ======================
+    Get_One_RIL = function(L,recRates,childGenotype, type = "sib"){
+      
+      if(type == "self") childGenotype = childGenotype[1:2,];
+      if(type == "sib")  childGenotype = childGenotype;
+      
+      fixed=FALSE
+      I=1
+      while (fixed == FALSE){
+        childGenotype = Make_Next_Generation(L, recRates, childGenotype, type)
+        fixed = Is_childGenotype_Fixed(childGenotype)
+      }#EndWhile
+      
+      return(childGenotype)
     }#EndFun
     
     

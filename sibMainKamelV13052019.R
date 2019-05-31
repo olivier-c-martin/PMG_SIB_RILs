@@ -7,10 +7,11 @@
     ## =================== Start Inpute ================
     ## =================================================
     ## Inpute number of loci
-    L = 7
+    L = 2
     nQs = 2^(L-2) * (2^(L-1) + 1)
     ## Input the successive recombination rates
     recRates = c(0.4, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1)
+    recRates = c(0.4)
     ## If you want to read the variables contributing to the system from the file
     # setwd("~/Documents/SVmapNew/MarianyelaProject/R")
     allvar = list.load("allVarTillL=10.rds")
