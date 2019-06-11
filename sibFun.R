@@ -326,56 +326,6 @@
       }
       res(n, L, g[1:n])
     }#EndFun
-    # # ===============================================
-    # ##          matrix4powL
-    # # ===============================================
-    # ## function to compute all the possible haplotype given the total number of loci which is equal to 4^L, where L is the number of loci.
-    # ## arguments : L = integr number reprersent the number of loci.
-    # 
-    # ## return a matrix of all the possible haplotypes.
-    # matrix4powL = function(L) {
-    #   fourPowL = 4^L
-    #   completeMat = matrix(data = 0, nrow = fourPowL, ncol = L)
-    #   cpt = 10
-    #   I = (fourPowL - 1)
-    #   for (i in 0:I) {
-    #     completeMat[1 + i, ] = quatNumber(i, L)
-    #     ## Print percentage of accomplished vertices
-    #     if ( ((i/I)*100)>=cpt ) {
-    #       cat(cpt, "% ",sep="")
-    #       cpt=cpt+10
-    #     }
-    #   }
-    #   return(completeMat)
-    # }#EndFun
-    # 
-    # # ================================================
-    # ##            quatNumber
-    # # ===============================================
-    # 
-    # quatNumber = function(number, space) {
-    #   quat = rep(0, space)
-    #   n = 0
-    #   k = number
-    #   while (k != 0) {
-    #     while (number != 0) {
-    #       if (number %% 4 != 0) {
-    #         number = (number - 1)
-    #       }
-    #       else {
-    #         number = number / 4
-    #         n = n + 1
-    #       }
-    #     }
-    #     pos = space - n
-    #     quat[pos] = quat[pos] + 1
-    #     number = k - (4 ^ n)
-    #     k = number
-    #     n = 0
-    #   }
-    #   return(quat)
-    # }#EndFun
-    
     
     
     # ===============================================
@@ -583,13 +533,13 @@
     ##                          L = numver of locis
     ## return a list of all variables contributed in each locus.
     
-    allCrossOver = function(varNom){
-      allContrVar = vector("list", length(varNom))
+    allCrossOver = function(distinctQs){
+      allContrVar = vector("list", length(distinctQs))
       #for (l in 2:L) {
-        noVarPerlocus = length(varNom)
+        noVarPerlocus = length(distinctQs)
         cpt = 10
         for (vr in 1:noVarPerlocus){
-          allContrVar[[vr]] = contributedQs(varNom[vr])
+          allContrVar[[vr]] = contributedQs(distinctQs[vr])
           ## Print percentage of accomplished vertices
           if ( ((vr/noVarPerlocus)*100)>=cpt ) {
             cat(cpt, "% ",sep="")
