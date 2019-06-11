@@ -494,10 +494,7 @@
     
     computeWeight = function(v, u) {
       w = cbind(v, u, rep(NA, length(v)))
-      posU = matrix(c(0, 1, 2, 3),
-                    ncol = 2,
-                    nrow = 2,
-                    byrow = TRUE)
+      posU = matrix(c(0, 1, 2, 3), ncol = 2, nrow = 2, byrow = TRUE)
       jj = 1
       i = 0
       evalength = 0
@@ -505,7 +502,7 @@
         index = which(v == i & u %in% posU[jj, ])
         linex = length(index)
         evalength = linex + evalength
-        if (jj == 2) {
+        if (jj == 2){
           i = i + 1
           jj = 0
         }
@@ -559,7 +556,7 @@
     }#EndFun
     
     #=========================
-    ##  all system variables
+    ##  all system inheritance indexes
     # ========================    
     systemVar = function(L){
       ## function to calculate all the variables contributed in the system at locus l.
@@ -568,7 +565,7 @@
       ## return a list of all variables contributed in each locus.
       
       #for(l in 1:L){
-      cat("\n Find the variables that are contributing to this system, please wait ... \n")
+      cat("\n Find the inheritance indexes that are contributing to this system, please wait ... \n")
         Qs = allPossHaplotypes(L)
         Qs = apply(Qs, 1, c2s)
         nonsymQs = unlist(lapply(Qs, standerIndex))
@@ -664,7 +661,7 @@
         cat("\n done.")
         return(sol)
       }else{
-        # or If you want to compute the variables contributing to the system agian
+        # or If you want to compute the inheritance indexes contributing to the system agian
         cat("\n # ======", L," - Loci ====== #", "\n")
         ln_varNom = length(varNom)
         ## Sum (Q)= 1 
@@ -672,8 +669,11 @@
         colnames(A) = varNom
         rownames(A) = c("SQ",varNom[-ln_varNom])
         A[1,] = table(nonSymQs)
+        cat("\n 1. The First equation in the system is: \n")
+        cat(paste(paste(as.vector(SQ),"Q(", names(SQ),")", collapse = "+", sep = ""),"=1\n", sep = ""))
+        
         ## start computing the self consistance equation (SCHP) for each varNom 
-        cat("\n Computing the Self-consistent equations: ... \n")
+        cat("\n 2. Computing the Self-consistent equations: ... \n")
         for (sc in 1:(ln_varNom-1) ){
           ## find all the possible meiotic product (the set V) for each haplotypes (u) denoted by varNom 
           eq = scEq[[sc]]
