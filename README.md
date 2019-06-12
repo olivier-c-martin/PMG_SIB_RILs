@@ -21,7 +21,7 @@ Then load the required packages:
 ```
 
 ```{r, include = FALSE}
-  source('~/Documents/SVmapNew/MarianyelaProject/R/PMGISRIL/sibFun.R')
+  source('sibFun.R')
 ```
 
 # Input
