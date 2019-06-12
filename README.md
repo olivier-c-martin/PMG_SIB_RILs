@@ -96,3 +96,8 @@ f[binTodec(child[1,])+1] = f[binTodec(child[1,])+1]+1
 mean((Fexp - Fsim)^2)
 
 
+```{r}
+  library(eply)
+  library(rlist)
+  library(rmarkdown)
+```
