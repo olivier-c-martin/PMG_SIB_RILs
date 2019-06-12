@@ -7,7 +7,7 @@ Probabilities of multilocus genotypes in SIB recombinant inbred lines.
 # Introduction
 Set the working directory to the emplacement of the source file "SibFun.R" and load it to the working environment. You can download the "SibFun.R" file from <https://github.com/Kamel20/PMGISRIL>, 
 
-```{r  eval=FALSE}
+```r
   setwd("the directory")
   source("sibFun.R")
 ```
