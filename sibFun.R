@@ -338,10 +338,11 @@
     ## return a new matrix of three columns, the first col represent the first index "l", the second col represent the second index "l'" and the third col represnt the value of that recombation rate r_ll'.
     
     allRecomRates = function(recRates) {
-      numTotalRec = fatt(length(recRates))
-      totalRec = matrix(data = 0,
-                        nrow = numTotalRec,
-                        ncol = 3)
+      L = length(recRates) + 1
+      #numTotalRec = fatt(length(recRates))
+      numTotalRec = dim(combn( c(1:L),2 ))[2]
+      
+      totalRec = matrix(data = 0, nrow = numTotalRec, ncol = 3)
       for (i in 1:length(recRates)) {
         totalRec[i, 1] = i
         totalRec[i, 2] = i + 1
@@ -380,19 +381,6 @@
       return(totalRec)
     }#EndFun
     
-    
-    # ================================================
-    ####  fatt
-    # ===============================================
-    ## function used for Conditional Element Selection 
-    ## arguments :   x = an object which can be coerced to logical mode.
-    
-    ## returns a value with the same shape as test which is filled with 
-    ## elements selected from either yes or no depending on whether the 
-    ## element of test is TRUE or FALSE.
-    fatt = function(x) {
-      ifelse(x == 1, 1, x + fatt(x - 1))
-    }#EndFun
     
     # ======================================
     ##            contributedQs
@@ -505,9 +493,9 @@
       return(neweMat)
     }#EndFun
     
-    #=========================
+    #=================================
     ##  all system inheritance indexes
-    # ========================    
+    # ================================
     systemVar = function(L){
       ## function to calculate all the variables contributed in the system at locus l.
       ## arguments :         l =  integr of the locus index.
@@ -550,49 +538,13 @@
       return(allContrVar)
     }#EndFun
     
-    # ====================================
-    ##    Compute all marginal equations
-    # ====================================
-    ## function to compute all the marginal equation at any given loci l.
-    ##                L =  integr, the loci index.
-    ##                varNom = vector of all the unique variables name in the l loci system.
     
-    ## Return: a matrix of all marginal equations.
-    
-    marginEquations = function(l, varNom) {
-      A = NULL
-      uniqueQsPrev = varNom[[l-1]]
-      ln_uniqueQsPrev = length(uniqueQsPrev)
-      uniqueQs = varNom[[l]]
-      ln_uniqueQs = length(uniqueQs)
-      cat("\n")
-      cat("Marginal Equation:")
-      for (i in 1:1) {
-        q = length(s2c(uniqueQs[1]))
-        while (q >= 1) {
-          AA = matrix(0, ncol = ln_uniqueQs, nrow = 1)
-          colnames(AA) = uniqueQs
-          rownames(AA) = inserteChar(uniqueQsPrev[i], "x", q)
-          marg = matrix(rep(s2c(uniqueQsPrev[i]), 4), ncol = length(s2c(uniqueQsPrev[i])) , byrow = 1)
-          marg = insertVector(q = q,
-                              mat = marg,
-                              v = as.character(c(0, 1, 2, 3)))
-          cat(" ", rownames(AA), ">>")
-          eq = apply(marg, 1, c2s)
-          eq = unlist(lapply(eq, standerIndex))
-          w = table(eq)
-          AA[, names(w)] = as.vector(w)
-          A = rbind(A, AA)
-          q = q - 1
-        }#EndWhile
-      }#EndFor
-      cat("\n")
-      return(A = A)
-    }#EndFun
     
     # ==============================
-    ## 
+    ## twoWayRILsib
     # ==============================
+    # The main function who comput the RIL probs 
+    
     twoWayRILsib = function(L, varNom, nonSymQs, scEq){
       ## function to compute the linear system (AQ=B)  for solving 2way RIL problem for L loci.
       ##                l =  integr, the loci index.
@@ -619,7 +571,7 @@
         colnames(A) = varNom
         rownames(A) = c("SQ",varNom[-ln_varNom])
         A[1,] = table(nonSymQs)
-        cat("\n 1. The First equation in the system is: \n")
+        cat("\n 1. The First equation in the system is: \n\n")
         cat(paste(paste(as.vector(SQ),"Q(", names(SQ),")", collapse = "+", sep = ""),"=1\n", sep = ""))
         
         ## start computing the self consistance equation (SCHP) for each varNom 
@@ -700,9 +652,9 @@
     }#EndFun
     
     
-    # ======================
+    # =========================
     ## convert binary to decimal 
-    # ======================
+    # =========================
     
     #Function from binary number to decimal number
     binTodec = function(binVector){
@@ -739,9 +691,8 @@
     # ======================
     ## make new generation 
     # ======================
-    Make_Next_Generation = function(L, recRates, childGenotype, type = "sib"){
+    Make_Next_Generation = function(L, recRates, childGenotype){
       
-      if(type == "sib"){
         gamete0 = childGenotype[1,]; gamete1 = childGenotype[2,]; 
         gamete2 = childGenotype[3,]; gamete3 = childGenotype[4,];
         
@@ -752,19 +703,6 @@
         childGenotype = matrix(c(newGamete0, newGamete1, 
                                  newGamete2, newGamete3), 
                                ncol = L, byrow = TRUE)
-        
-      }else if(type == "self"){
-        gamete0 = childGenotype[1,]
-        gamete1 = childGenotype[2,]; 
-        
-        newGamete0 = Make_Gamete(L, recRates, gamete0, gamete1)
-        newGamete1 = Make_Gamete(L, recRates, gamete0, gamete1)
-        childGenotype = matrix(c(newGamete0, newGamete1), 
-                               ncol = L, byrow = TRUE)
-      }else{
-        stop("Please specify the type of fertilization ... ")
-      }
-      
       
       return(childGenotype)
     }#EndFun
@@ -787,15 +725,14 @@
     # ======================
     ## new RIL generation 
     # ======================
-    Get_One_RIL = function(L,recRates,childGenotype, type = "sib"){
+    Get_One_RIL = function(L,recRates,childGenotype){
       
-      if(type == "self") childGenotype = childGenotype[1:2,];
-      if(type == "sib")  childGenotype = childGenotype;
+      childGenotype = childGenotype;
       
       fixed=FALSE
       I=1
       while (fixed == FALSE){
-        childGenotype = Make_Next_Generation(L, recRates, childGenotype, type)
+        childGenotype = Make_Next_Generation(L, recRates, childGenotype)
         fixed = Is_childGenotype_Fixed(childGenotype)
       }#EndWhile
       
