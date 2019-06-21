@@ -29,9 +29,9 @@
     # ===============================================
     ####            vIndex2vprimeIndex
     # ===============================================
-    ## For an arbitrary index v indexing the Qs, return the index v' such that v and v' are equivalent
+    ## For an arbitrary index v indexing the Q's, return the index v' such that v and v' are equivalent
     ## (Q(v) = Q(v') because of the symmetries of exchanges of chromosomes) and Q(v') is one of the  
-    ## (non-equivalent) unknowns to be computed (it is in the reduced set N_Q(L) Qs).    
+    ## (non-equivalent) unknowns to be computed (it is in the reduced set N_Q(L) Q's).    
     ## Function to transform a "v" string of indices (used to access Q(v)) to 
     ## its equivalent vprime (in the list of size N_Q(L)) by using the system's symmetries:
     ## v(1) can be forced to 0 and the first occurrence of 2 or 3 can be forced to be 2
@@ -437,7 +437,7 @@
     ## interpret the binary entry (0 vs 1) as the first vs second entry of the possible values of "v"
     ## and reset those entries using the rules for u -> v (for non zero entries of T[ u -> v ])
     ## Because these operations are done on whole collumns, they are relatively efficient in terms of CPU
-    ## The CPU time is mainly spent on mapping the "v"'s onto "vprime"'s (non-equivalent Qs)
+    ## The CPU time is mainly spent on mapping the "v"'s onto "vprime"'s (non-equivalent Q's)
     
     contributingQs =  function(st = "02102130") {
       x = s2c(st)
@@ -550,18 +550,18 @@
     ##  all system inheritance indexes
     # =================================    
     systemVar = function(L){
-      ## function to provide for each "u" index the associated "u_prime" index labeling Qs and also the
-      ## N_Q(L) "u_prime" indices, that is the indices of the non-equivalent Qs for L loci
+      ## function to provide for each "u" index the associated "u_prime" index labeling Q's and also the
+      ## N_Q(L) "u_prime" indices, that is the indices of the non-equivalent Q's for L loci
       ## arguments :         L = integer (number of loci)
       
       ## return a list of the "v"s and a list of the "vprime"s
       
-      cat("\n 1. Find the inheritance indexes that are contributing to this system, please wait: ... \n")
+      cat("\n 1. Find the inheritance indices that are contributing to this system, please wait: ... \n")
       allus = all_IBD_Haplotypes(L)    # 4^L of these "u" indices for IBDs in SIB RILs
       allus = apply(allus, 1, c2s)
       alluprimes = unlist(lapply(allus, vIndex2vprimeIndex))   # give the u_prime rather than the u
                                                                # will be useful for constructing equations
-      uniqueuprimes = unique(alluprimes)    # N_Q(L) non-equivalent Qs (our unknowns)
+      uniqueuprimes = unique(alluprimes)    # N_Q(L) non-equivalent Q's (our unknowns)
       #}#EndFor
       cat("\n")
       return(list(symQs = uniqueuprimes, indicesAllQs = alluprimes))
@@ -571,11 +571,11 @@
     # =======================================
     # The v_primes for all possible u_primes
     # =======================================
-    ## function to calculate all the the contributing v_prime values contributing to the self-consistent
-    ## equation for Q(u_prime) (prime for the restriction to non-equivalent Qs), over all N_Q(L) u_prime strings
+    ## function to calculate all the contributing v_prime values contributing to the self-consistent
+    ## equation for Q(u_prime) (prime for the restriction to non-equivalent Q's), over all N_Q(L) u_prime strings
     ## arguments :         indicesNonEquivalentQs =  vector of strings representing the "u_prime"'s
     ##                          L = number of loci
-    ## Return a list of all non-equivalent Qs (via their v_primes) contributing to these equations
+    ## Return a list of all non-equivalent Q's (via their v_primes) contributing to these equations
     
     allvprimeForEachuprime = function(nonEquivalentQs){
       cat("\n 2. calculate all the the contributing v_prime values contributing to the self-consistent equation for Q(u_prime):\n")
@@ -601,14 +601,14 @@
       ## function to specify the linear system (A Q = B) used for solving 2-way RIL multilocus
       ## probabilities when one has L loci.
       ##                L =  integer (the number of loci)
-      ##           indicesNonEquivalentQs = vector of all the non-equivalent "u" indices of the Qs for L loci
-      ##         indicesAllQs = vector of all (including equivalents) "u" indices of the Qs for L loci
+      ##           indicesNonEquivalentQs = vector of all the non-equivalent "u" indices of the Q's for L loci
+      ##         indicesAllQs = vector of all (including equivalents) "u" indices of the Q's for L loci
       ##             all_vpForAll_up = list of vprime vectors to consider in T[ u -> v ] for 
       ##                               each uprime vector (prime for non-equivalent)
       
       ## Returns A and B of the linear system A Q = B, A being an N_Q(L) x N_Q(L) matrix in algebraic form (not numerical)
       
-      A = matrix(0, ncol = length_indicesNonEquivalentQs, nrow = length_indicesNonEquivalentQs)
+      A = matrix(0, ncol = length(indicesNonEquivalentQs), nrow = length(indicesNonEquivalentQs) )
       colnames(A) = indicesNonEquivalentQs
 
       ## For L = 1, the result is known
@@ -624,7 +624,7 @@
         # or If you want to compute the inheritance indices contributing to the system from scratch
         cat("\n # ======", L," - Loci ====== #", "\n")
         length_indicesNonEquivalentQs = length(indicesNonEquivalentQs)
-        ## The first equation of the system is Sum (Q)= 1, specify it in terms of the non-equivalent Qs 
+        ## The first equation of the system is Sum (Q)= 1, specify it in terms of the non-equivalent Q's 
         rownames(A) = c("SumQs",indicesNonEquivalentQs[-length_indicesNonEquivalentQs])
         A[1,] = table(indicesAllQs)
         cat("\n 3. The First equation in the system is: \n")
@@ -701,16 +701,16 @@
     
     
     # =============================================================================
-    ## convert Qs (RIL IBD probabilities) to RIL multilocus genotype probabilities
+    ## convert Q's (RIL IBD probabilities) to RIL multilocus genotype probabilities
     # =============================================================================
     ## function outputing the 2^L probabilities of multilocus SIB RIL genotypes given the
-    ## SIB RIL multilocus IBD probabilities represented by the | Q_L | distinct Qs
+    ## SIB RIL multilocus IBD probabilities represented by the | Q_L | distinct Q's
     ## Input: L = number (of loci) and nonEquivalentQs = Vector (of the | Q_L | IBD probabilities)
       
     ## Return: 2^L RIL multilocus genotype probabilities
    
     QsToGenotypeProbabilities = function(L, nonEquivalentQs){
-      cat("\n 4. Convert Qs (RIL IBD probabilities) to RIL multilocus genotype probabilities: \n")
+      cat("\n 6. Going from  Q's (RIL IBD probabilities) to RIL multilocus genotype probabilities: \n")
       cpt = 10
       vecGenoProbs =rep(0, 2^L)
       vecZeroes = rep(0, 2^L)
@@ -842,48 +842,3 @@
       return(childGenotype)
     }#EndFun
     
-    #===================================================================================
-    # An example of using the functions to obtain the IBD or RIL genotype probabilities
-    #===================================================================================
-    t1 = Sys.time()
-    library(eply)
-    library(rlist)
-    library(rmarkdown)
-
-    L_loci = 3                        # Number of loci
-    recRates = c(0.4, 0.2, 0.3)       # Vector of length L_loci-1 of the recombination rates of successive intervals
-
-
-    L_loci = 7
-    recRates = rep(0.1,L_loci-1)
-
-
-
-    allQs = systemVar(L_loci)                          # Gets all indices of the variables to work with:
-    nonEquivalentQs = allQs$symQs                      # the N_Q(L) non-equivalent Qs
-    allQsMappedToNonEquivalent = allQs$indicesAllQs    # but also the 4^L Qs after mapping them to the non-equivalent ones
-    multiplicityQs = table(allQsMappedToNonEquivalent) # multiplicity factor (the number of times a non-equivalent Q arises)
-
-    # Construct the list of all v_primes given the u_primes, used to construct the self-consistent equations
-    allvpForallup = allvprimeForEachuprime(nonEquivalentQs)
-
-    # The analytic expressions of the system of linear equations to be solved
-    analyticEquations = twoWayRILsib(L_loci, nonEquivalentQs, allQsMappedToNonEquivalent, allvpForallup, multiplicityQs)
-    Amatrix = analyticEquations$A
-    Bvector = analyticEquations$B
-
-    # Numerical treatment
-    numericAmatrix = evalMatrix(A = Amatrix, recRates = recRates) # Substitute the numerical values of the recombination rates
-    solution = solve(numericAmatrix, Bvector)  # solution for the N_Q(L) unknown (non-equivalent) Qs
-    t2 =Sys.time()
-    t2-t1
-    names(solution) = nonEquivalentQs
-    sumAllIBDProbabilities = sum(solution*multiplicityQs)    # should be 1
-
-    allProbabilitiesOfRilGenotypes= QsToGenotypeProbabilities(L_loci, solution)  # Provides the 2^L
-                                                                                 # RIL genotype probabilities
-    sumAllGenotypeProbabilities = sum(allProbabilitiesOfRilGenotypes)            # should be 1
-
-
-
-
