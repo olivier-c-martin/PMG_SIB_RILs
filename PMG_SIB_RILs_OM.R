@@ -1,3 +1,4 @@
+    #rm(list=objects())
     # ==============================================
     ####                    s2c
     # ==============================================
@@ -460,8 +461,7 @@
 
       allPs = allPs[allPs[,1]==0,]             # optimization: for input string that is in non-equivalent list, gain factor 2 for rest
       res = apply(data.frame(allPs), 1, c2s)
-      res = lapply(res, vIndex2vprimeIndex)    # where most of the CPU time is spent
-      res = unlist(res)
+      res = mapply(function(x) vIndex2vprimeIndex(x),res)  # where most of the CPU time is spent
       res = unique(res)              # remove redundancies in "v"s via unique
       return(res)
     }#EndFun
@@ -527,6 +527,7 @@
       #              recRates = vector of all the recombination rates.
 
       ## Returns a numerical matrix.
+      cat("\n 5. Evaluate the input matrix, substituting the numerical values of the recombination rates: \n ")
 
       recMat = allRecombRates(recRates)  # because only adjacent recombination rates are passed
                                          # while the matrix involves recombination rates for all intervals
@@ -535,7 +536,7 @@
         assign( recMat[i,1], recMat[i,2])
         cat(recMat[i,1], "=", recMat[i,2], "    ")
       }
-      
+      cat("\n")
       eMatv = as.vector(unlist(A))
       index = which(eMatv!="0" & eMatv!="1" & eMatv!="-1" & eMatv!="2")
       indexEvl = evals(eMatv[index])
@@ -555,7 +556,7 @@
       
       ## return a list of the "v"s and a list of the "vprime"s
       
-      cat("\n Find the inheritance indexes that are contributing to this system, please wait ... \n")
+      cat("\n 1. Find the inheritance indexes that are contributing to this system, please wait: ... \n")
       allus = all_IBD_Haplotypes(L)    # 4^L of these "u" indices for IBDs in SIB RILs
       allus = apply(allus, 1, c2s)
       alluprimes = unlist(lapply(allus, vIndex2vprimeIndex))   # give the u_prime rather than the u
@@ -577,6 +578,7 @@
     ## Return a list of all non-equivalent Qs (via their v_primes) contributing to these equations
     
     allvprimeForEachuprime = function(nonEquivalentQs){
+      cat("\n 2. calculate all the the contributing v_prime values contributing to the self-consistent equation for Q(u_prime):\n")
       N_QofL = length(nonEquivalentQs)
       contributingNonEquivalentQs = vector("list", N_QofL)
       cpt = 10               # to notify the user when each 10% of the calculation is done
@@ -622,11 +624,11 @@
         colnames(A) = indicesNonEquivalentQs
         rownames(A) = c("SumQs",indicesNonEquivalentQs[-length_indicesNonEquivalentQs])
         A[1,] = table(indicesAllQs)
-        cat("\n 1. The First equation in the system is: \n")
+        cat("\n 3. The First equation in the system is: \n")
         cat(paste(paste(as.vector(multiplicityQs),"Q(", names(multiplicityQs),")", collapse = "+", sep = ""),"=1\n", sep = ""))
         
         ## start computing the self-consistent equation for each non-equivalent Q (each unknown) 
-        cat("\n 2. Computing the self-consistent equations: ... \n")
+        cat("\n 4. Computing the self-consistent equations: ... \n")
         for (sc in 1:(length_indicesNonEquivalentQs-1) ){
           ## find all the possible IBD "haplotype" (the possible v's) for each haplotype (u = indicesNonEquivalentQs) 
           eq = all_vpForAll_up[[sc]]
@@ -704,6 +706,7 @@
     ## Return: 2^L RIL multilocus genotype probabilities
    
     QsToGenotypeProbabilities = function(L, nonEquivalentQs){
+      cat("\n 4. Convert Qs (RIL IBD probabilities) to RIL multilocus genotype probabilities: \n")
       cpt = 10
       vecGenoProbs =rep(0, 2^L)
       vecZeroes = rep(0, 2^L)
@@ -834,45 +837,49 @@
       
       return(childGenotype)
     }#EndFun
+    
+    #===================================================================================
+    # An example of using the functions to obtain the IBD or RIL genotype probabilities
+    #===================================================================================
+    t1 = Sys.time()
+    library(eply)
+    library(rlist)
+    library(rmarkdown)
+
+    L_loci = 4                        # Number of loci
+    recRates = c(0.5, 0.3, 0.4)       # Vector of length L_loci-1 of the recombination rates of successive intervals
 
 
-    # ===================================================================================
-    ## An example of using the functions to obtain the IBD or RIL genotype probabilities
-    # ===================================================================================
-    # library(eply)
-    # library(rlist)
-    # library(rmarkdown)
-    # 
-    # L_loci = 3                        # Number of loci
-    # recRates = c(0.4, 0.2, 0.3)       # Vector of length L_loci-1 of the recombination rates of successive intervals
-    # 
-    # 
-    # # L_loci = 7
-    # # recRates = rep(0.1,L_loci-1)
-    # 
-    # 
-    # 
-    # allQs = systemVar(L_loci)                          # Gets all indices of the variables to work with:
-    # nonEquivalentQs = allQs$symQs                      # the N_Q(L) non-equivalent Qs
-    # allQsMappedToNonEquivalent = allQs$indicesAllQs    # but also the 4^L Qs after mapping them to the non-equivalent ones
-    # multiplicityQs = table(allQsMappedToNonEquivalent) # multiplicity factor (the number of times a non-equivalent Q arises)
-    # 
-    # # Construct the list of all v_primes given the u_primes, used to construct the self-consistent equations
-    # allvpForallup = allvprimeForEachuprime(nonEquivalentQs)
-    # 
-    # # The analytic expressions of the system of linear equations to be solved
-    # analyticEquations = twoWayRILsib(L_loci, nonEquivalentQs, allQsMappedToNonEquivalent, allvpForallup, multiplicityQs)  
-    # Amatrix = analyticEquations$A
-    # Bvector = analyticEquations$B
-    # 
-    # # Numerical treatment
-    # numericAmatrix = evalMatrix(A = Amatrix, recRates = recRates) # Substitute the numerical values of the recombination rates
-    # solution = solve(numericAmatrix, Bvector)  # solution for the N_Q(L) unknown (non-equivalent) Qs
-    # names(solution) = nonEquivalentQs
-    # sumAllIBDProbabilities = sum(solution*multiplicityQs)    # should be 1
-    # 
-    # allProbabilitiesOfRilGenotypes= QsToGenotypeProbabilities(L_loci, solution)  # Provides the 2^L
-    #                                                                              # RIL genotype probabilities
-    # sumAllGenotypeProbabilities = sum(allProbabilitiesOfRilGenotypes)            # should be 1
-    # 
-    # 
+    #L_loci = 8
+    #recRates = rep(0.1,L_loci-1)
+
+
+
+    allQs = systemVar(L_loci)                          # Gets all indices of the variables to work with:
+    nonEquivalentQs = allQs$symQs                      # the N_Q(L) non-equivalent Qs
+    allQsMappedToNonEquivalent = allQs$indicesAllQs    # but also the 4^L Qs after mapping them to the non-equivalent ones
+    multiplicityQs = table(allQsMappedToNonEquivalent) # multiplicity factor (the number of times a non-equivalent Q arises)
+
+    # Construct the list of all v_primes given the u_primes, used to construct the self-consistent equations
+    allvpForallup = allvprimeForEachuprime(nonEquivalentQs)
+
+    # The analytic expressions of the system of linear equations to be solved
+    analyticEquations = twoWayRILsib(L_loci, nonEquivalentQs, allQsMappedToNonEquivalent, allvpForallup, multiplicityQs)
+    Amatrix = analyticEquations$A
+    Bvector = analyticEquations$B
+
+    # Numerical treatment
+    numericAmatrix = evalMatrix(A = Amatrix, recRates = recRates) # Substitute the numerical values of the recombination rates
+    solution = solve(numericAmatrix, Bvector)  # solution for the N_Q(L) unknown (non-equivalent) Qs
+    t2 =Sys.time()
+    t2-t1
+    names(solution) = nonEquivalentQs
+    sumAllIBDProbabilities = sum(solution*multiplicityQs)    # should be 1
+
+    allProbabilitiesOfRilGenotypes= QsToGenotypeProbabilities(L_loci, solution)  # Provides the 2^L
+                                                                                 # RIL genotype probabilities
+    sumAllGenotypeProbabilities = sum(allProbabilitiesOfRilGenotypes)            # should be 1
+
+
+
+
