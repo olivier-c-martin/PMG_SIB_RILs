@@ -175,3 +175,5 @@ You can compare the analytic results with the simulation one and compute the mea
 ```r
   mean((Fexp - Fsim)^2)
 ```
+# PMG_SIB_RILs
+Probabilities of Multilocus Genotypes in SIB Recombinant Inbred Lines
